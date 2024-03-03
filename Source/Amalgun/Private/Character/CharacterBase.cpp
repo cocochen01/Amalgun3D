@@ -1,34 +1,177 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
+//Header File
 #include "Character/CharacterBase.h"
-
-// Sets default values
+//Enhanced Input
+#include "Components/InputComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+//Components
+#include "Components/ArrowComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+////////////////////////////////////////
 ACharacterBase::ACharacterBase()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	HandComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("HandComponent"));
+	HandComponent->SetupAttachment(GetRootComponent());
+
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	SpringArm->SetupAttachment(GetRootComponent());
+	SpringArm->TargetArmLength = 200.f;
+
+	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
+	ViewCamera->SetupAttachment(SpringArm);
+
+
+	GetCharacterMovement()->JumpZVelocity = 2000.f;
+	GetCharacterMovement()->GravityScale = 5.f;
+	GetCharacterMovement()->AirControl = 1.f;
+	GetCharacterMovement()->GroundFriction = 50.f;
+	GetCharacterMovement()->MaxAcceleration = 10000.f;
 }
 
-// Called when the game starts or when spawned
 void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	//Controller and Input
+	PlayerControl = Cast<APlayerController>(GetController());
+	if (PlayerControl)
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerControl->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(CharacterContext, 0);
+		}
+		if (PlayerControl->PlayerCameraManager)
+		{
+			PlayerControl->PlayerCameraManager->ViewPitchMin = -30.0;
+			PlayerControl->PlayerCameraManager->ViewPitchMax = 45.0;
+		}
+	}
+	//Get Bone from Skeleton
+	if (GetMesh())
+	{
+		FName BoneName = FName(TEXT("spine_003"));
+
+		if (int8 boneIndex = GetMesh()->GetBoneIndex(BoneName))
+		{
+			// Get the bone name and convert it to a string.
+			FString BoneNameString = BoneName.ToString();
+
+			// Log the bone name.
+			UE_LOG(LogTemp, Warning, TEXT("Bone Index: %d"), boneIndex);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Bone does not exist: %s"), *BoneName.ToString());
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("CharacterSkeletalMesh is not valid."));
+	}
 }
 
-// Called every frame
+void ACharacterBase::Move(const FInputActionValue& Value)
+{
+	if (bInMenu)
+	{
+		
+	}
+	else
+	{
+		const FVector2D MovementVector = Value.Get<FVector2D>();
+		bIsMovingBackward = MovementVector.Y < 0.f;
+		//Movement
+		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(ForwardDirection, MovementVector.Y);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		AddMovementInput(RightDirection, MovementVector.X);
+	}
+}
+
+void ACharacterBase::Look(const FInputActionValue& Value)
+{
+	if (bInMenu)
+	{
+
+	}
+	else
+	{
+		const FVector2D LookingVector = Value.Get<FVector2D>();
+		if (GetController())
+		{
+			AddControllerYawInput(LookingVector.X);
+			AddControllerPitchInput(-LookingVector.Y);
+		}
+	}
+}
+
+void ACharacterBase::I_Key()
+{
+	if(GEngine)
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Pressed I"));
+	if (!OtherCamera)
+		return;
+	bInMenu = true;
+	PlayerControl->SetViewTargetWithBlend(OtherCamera, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
+}
+
+void ACharacterBase::Esc_Key()
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Pressed Esc"));
+	PlayerControl->SetViewTargetWithBlend(this, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
+	bInMenu = false;
+}
+
+void ACharacterBase::UpdateRotation(float DeltaTime)
+{
+	if (bIsMoving)
+	{
+
+	}
+	else
+	{
+		//rotate character body
+		TargetRotation = FRotator(0.f, GetControlRotation().Yaw, 0.f);
+		SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, TurnSpeed));
+		//rotate hands
+		HandComponent->SetRelativeRotation(FMath::RInterpTo(HandComponent->GetRelativeRotation(), FRotator(GetControlRotation().Pitch, 0.f, 0.f), DeltaTime, TurnSpeed));
+
+	}
+}
+
 void ACharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	UpdateRotation(DeltaTime);
 }
 
-// Called to bind functionality to input
 void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACharacterBase::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACharacterBase::Look);
+		EnhancedInputComponent->BindAction(I_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::I_Key);
+		EnhancedInputComponent->BindAction(Esc_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::Esc_Key);
+		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacterBase::Jump);
+	}
 }
 
+void ACharacterBase::SetCameraView(AActor* CameraActor)
+{
+	if (!CameraActor)
+		return;
+	OtherCamera = CameraActor;
+}
+
+void ACharacterBase::ResetCameraView()
+{
+	PlayerControl->SetViewTarget(this);
+}
