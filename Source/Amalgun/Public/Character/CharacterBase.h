@@ -31,6 +31,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void SetCameraView(AActor* CameraActor);
 	void ResetCameraView();
+	void TogglePauseMenu();
 
 protected:
 	virtual void BeginPlay() override;

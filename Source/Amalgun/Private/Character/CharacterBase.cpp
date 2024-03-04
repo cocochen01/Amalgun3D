@@ -1,5 +1,6 @@
 //Header File
 #include "Character/CharacterBase.h"
+#include "AmalgunPlayerController.h"
 //Enhanced Input
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
@@ -123,8 +124,13 @@ void ACharacterBase::Esc_Key()
 {
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Pressed Esc"));
-	PlayerControl->SetViewTargetWithBlend(this, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
-	bInMenu = false;
+	if (bInMenu)
+	{
+		PlayerControl->SetViewTargetWithBlend(this, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
+		bInMenu = false;
+	}
+	else
+		TogglePauseMenu();
 }
 
 void ACharacterBase::UpdateRotation(float DeltaTime)
@@ -174,4 +180,16 @@ void ACharacterBase::SetCameraView(AActor* CameraActor)
 void ACharacterBase::ResetCameraView()
 {
 	PlayerControl->SetViewTarget(this);
+}
+
+void ACharacterBase::TogglePauseMenu()
+{
+	if (PlayerControl)
+	{
+		AAmalgunPlayerController* PC = Cast<AAmalgunPlayerController>(PlayerControl);
+		if (PC)
+		{
+			PC->TogglePauseMenu();
+		}
+	}
 }
