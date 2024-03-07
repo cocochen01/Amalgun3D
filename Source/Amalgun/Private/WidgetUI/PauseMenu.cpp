@@ -2,12 +2,14 @@
 
 
 #include "WidgetUI/PauseMenu.h"
+#include "AmalgunPlayerController.h"
 //Components
 #include "Components/Button.h"
 
 void UPauseMenu::NativeConstruct()
 {
     Super::NativeConstruct();
+    bIsFocusable = true;
 
     if (ResumeButton)
     {
@@ -28,6 +30,23 @@ void UPauseMenu::NativeConstruct()
     {
         QuitButton->OnClicked.AddDynamic(this, &UPauseMenu::OnQuitClicked);
     }
+}
+
+FReply UPauseMenu::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+    if (InKeyEvent.GetKey() == EKeys::Escape)
+    {
+        if (APlayerController* PlayerController = GetOwningPlayer())
+        {
+            if (AAmalgunPlayerController* APlayerController = Cast<AAmalgunPlayerController>(PlayerController))
+            {
+                APlayerController->TogglePauseMenu();
+            }
+        }
+        return FReply::Handled();
+    }
+
+    return FReply::Unhandled();
 }
 
 void UPauseMenu::OnResumeClicked()

@@ -29,6 +29,9 @@ protected:
     UPROPERTY(meta = (BindWidget))
     class UButton* QuitButton;
 
+
+    virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+
 public:
     virtual void NativeConstruct() override;
 
