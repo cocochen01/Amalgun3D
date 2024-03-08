@@ -11,11 +11,6 @@ void UPauseMenu::NativeConstruct()
     Super::NativeConstruct();
     bIsFocusable = true;
 
-    if (ResumeButton)
-    {
-        ResumeButton->OnClicked.AddDynamic(this, &UPauseMenu::OnResumeClicked);
-    }
-
     if (SettingsButton)
     {
         SettingsButton->OnClicked.AddDynamic(this, &UPauseMenu::OnSettingsClicked);

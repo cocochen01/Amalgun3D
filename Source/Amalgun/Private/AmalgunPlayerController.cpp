@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerInput.h"
 #include "AmalgunGameInstance.h"
+#include "Character/CharacterBase.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 //#include "Kismet/GameplayStatics.h"
 
 void AAmalgunPlayerController::BeginPlay()
@@ -38,23 +40,23 @@ void AAmalgunPlayerController::TogglePauseMenu()
 
     if (bIsMenuVisible)
     {
-        bShowMouseCursor = false;
         SetInputMode(FInputModeGameOnly());
+        bShowMouseCursor = false;
     }
     else
     {
-        bShowMouseCursor = true;
-        SetInputMode(FInputModeUIOnly());
+        FInputModeGameAndUI InputMode;
+        InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+        SetInputMode(InputMode);
+
         FVector2D ViewportSize;
         if (GEngine && GEngine->GameViewport) {
             GEngine->GameViewport->GetViewportSize(ViewportSize);
         }
         FVector2D MousePosition(ViewportSize.X / 2, ViewportSize.Y / 2);
         SetMouseLocation(MousePosition.X, MousePosition.Y);
-        if (PauseMenu)
-        {
-            PauseMenu->SetKeyboardFocus();
-        }
+        //if (PauseMenu) PauseMenu->SetKeyboardFocus();
+        bShowMouseCursor = true;
     }
 }
 

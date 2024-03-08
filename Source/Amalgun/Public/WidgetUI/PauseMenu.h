@@ -18,9 +18,6 @@ class AMALGUN_API UPauseMenu : public UUserWidget
 
 protected:
     UPROPERTY(meta = (BindWidget))
-    class UButton* ResumeButton;
-
-    UPROPERTY(meta = (BindWidget))
     class UButton* SettingsButton;
 
     UPROPERTY(meta = (BindWidget))
