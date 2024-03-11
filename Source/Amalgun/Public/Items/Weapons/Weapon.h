@@ -16,8 +16,11 @@ class AMALGUN_API AWeapon : public AItem
 	
 public:
 	AWeapon();
+
 protected:
+	virtual void BeginPlay() override;
 	virtual void OnBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 	virtual void OnEndOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
+
 private:
 };

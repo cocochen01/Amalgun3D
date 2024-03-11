@@ -8,6 +8,17 @@
 
 class USphereComponent;
 class UStaticMeshComponent;
+class UWidgetComponent;
+
+UENUM(BlueprintType)
+enum class EItemState : uint8
+{
+	EIS_Initial UMETA(DisplayName = "Initial State"),
+	EIS_Equipped UMETA(DisplayName = "Equipped"),
+	EIS_Dropped UMETA(DisplayName = "Dropped"),
+
+	EIS_MAX UMETA(DisplayName = "DefaultMAX")
+};
 
 UCLASS()
 class AMALGUN_API AItem : public AActor
@@ -25,9 +36,16 @@ protected:
 	UFUNCTION()
 	virtual void OnEndOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-private:	
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* ItemMesh;
-	UPROPERTY(VisibleAnywhere)
-	USphereComponent* CollisionComponent;
+private:
+	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	USkeletalMeshComponent* ItemMesh;
+
+	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	USphereComponent* AreaSphere;
+
+	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	EItemState ItemState;
+
+	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UWidgetComponent* PickupWidget;
 };

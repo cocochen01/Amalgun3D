@@ -4,28 +4,44 @@
 #include "Items/Item.h"
 //Components
 #include "Components/SphereComponent.h"
+#include "Components/WidgetComponent.h"
 //Other Includes
 #include "Character/CharacterBase.h"
 
 // Sets default values
 AItem::AItem()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
-	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
-	RootComponent = ItemMesh;
+	ItemMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ItemMesh"));
+	ItemMesh->SetupAttachment(RootComponent);
+	SetRootComponent(ItemMesh);
 
-	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
-	CollisionComponent->SetupAttachment(GetRootComponent());
+	ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	ItemMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
+	AreaSphere->SetupAttachment(RootComponent);
+	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	//AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+
+	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
+	PickupWidget->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (PickupWidget)
+		PickupWidget->SetVisibility(false);
 	
-	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnBeginOverlap);
-	CollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AItem::OnEndOverlap);
+	AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnBeginOverlap);
+	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnEndOverlap);
 }
 
 // Called every frame
@@ -41,7 +57,9 @@ void AItem::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 	if (!Character)
 		return;
 	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Begin Weapon Overlap"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Begin Item Overlap"));
+	if(PickupWidget)
+		PickupWidget->SetVisibility(true);
 }
 
 void AItem::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -50,6 +68,8 @@ void AItem::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Other
 	if (!Character)
 		return;
 	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("End Weapon Overlap"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("End Item Overlap"));
+	if (PickupWidget)
+		PickupWidget->SetVisibility(false);
 }
 
