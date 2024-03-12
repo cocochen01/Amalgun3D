@@ -14,6 +14,7 @@ class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
 class UArrowComponent;
+class UCombatComponent;
 
 UCLASS()
 class AMALGUN_API ACharacterBase : public ACharacter
@@ -47,11 +48,14 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* I_KeyAction;
 	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* E_KeyAction;
+	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* Esc_KeyAction;
 	/////// Functions ///////
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void I_Key();
+	void E_Key();
 	void Esc_Key();
 
 private:
@@ -69,6 +73,8 @@ private:
 	UCameraComponent* ViewCamera;
 	UPROPERTY(VisibleAnywhere)
 	UArrowComponent* HandComponent;
+	UPROPERTY(VisibleAnywhere)
+	UCombatComponent* Combat;
 	/////// Functions ///////
 	void UpdateRotation(float);
 };

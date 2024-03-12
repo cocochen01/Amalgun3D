@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CombatComponent.h"
 ////////////////////////////////////////
 ACharacterBase::ACharacterBase()
 {
@@ -25,12 +26,13 @@ ACharacterBase::ACharacterBase()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	ViewCamera->SetupAttachment(SpringArm);
 
-
 	GetCharacterMovement()->JumpZVelocity = 2000.f;
 	GetCharacterMovement()->GravityScale = 5.f;
 	GetCharacterMovement()->AirControl = 1.f;
 	GetCharacterMovement()->GroundFriction = 50.f;
 	GetCharacterMovement()->MaxAcceleration = 10000.f;
+
+	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 }
 
 void ACharacterBase::BeginPlay()
@@ -120,6 +122,12 @@ void ACharacterBase::I_Key()
 	PlayerControl->SetViewTargetWithBlend(OtherCamera, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
 }
 
+void ACharacterBase::E_Key()
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Pressed E"));
+}
+
 void ACharacterBase::Esc_Key()
 {
 	if (GEngine)
@@ -131,6 +139,21 @@ void ACharacterBase::Esc_Key()
 	}
 	else
 		TogglePauseMenu();
+}
+
+void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACharacterBase::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACharacterBase::Look);
+		EnhancedInputComponent->BindAction(I_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::I_Key);
+		EnhancedInputComponent->BindAction(E_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::E_Key);
+		EnhancedInputComponent->BindAction(Esc_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::Esc_Key);
+		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacterBase::Jump);
+	}
 }
 
 void ACharacterBase::UpdateRotation(float DeltaTime)
@@ -156,24 +179,8 @@ void ACharacterBase::Tick(float DeltaTime)
 	UpdateRotation(DeltaTime);
 }
 
-void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACharacterBase::Move);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACharacterBase::Look);
-		EnhancedInputComponent->BindAction(I_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::I_Key);
-		EnhancedInputComponent->BindAction(Esc_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::Esc_Key);
-		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacterBase::Jump);
-	}
-}
-
 void ACharacterBase::SetCameraView(AActor* CameraActor)
 {
-	if (!CameraActor)
-		return;
 	OtherCamera = CameraActor;
 }
 
