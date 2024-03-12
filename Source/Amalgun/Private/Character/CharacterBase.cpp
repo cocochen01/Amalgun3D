@@ -116,10 +116,17 @@ void ACharacterBase::I_Key()
 {
 	if(GEngine)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Pressed I"));
-	if (!OtherCamera)
-		return;
-	bInMenu = true;
-	PlayerControl->SetViewTargetWithBlend(OtherCamera, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
+	//if (!OtherCamera) return;
+	if (bInMenu)
+	{
+		PlayerControl->SetViewTargetWithBlend(this, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
+		bInMenu = false;
+	}
+	else if(OtherCamera)
+	{
+		PlayerControl->SetViewTargetWithBlend(OtherCamera, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
+		bInMenu = true;
+	}
 }
 
 void ACharacterBase::E_Key()
