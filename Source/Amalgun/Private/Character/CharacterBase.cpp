@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 //Components
 #include "Components/ArrowComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -18,6 +19,9 @@ ACharacterBase::ACharacterBase()
 
 	HandComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("HandComponent"));
 	HandComponent->SetupAttachment(GetRootComponent());
+
+	HandMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HandMeshComponent"));
+	HandMeshComponent->SetupAttachment(HandComponent);
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
@@ -160,6 +164,15 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(E_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::E_Key);
 		EnhancedInputComponent->BindAction(Esc_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::Esc_Key);
 		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacterBase::Jump);
+	}
+}
+
+void ACharacterBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (Combat)
+	{
+		Combat->Character = this;
 	}
 }
 

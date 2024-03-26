@@ -2,6 +2,10 @@
 
 
 #include "Components/CombatComponent.h"
+//Components
+//Other headers
+//#include "Data/ItemDataStructs.h"
+#include "Items/Weapons/Weapon.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -22,5 +26,12 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+}
+
+void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if (!Character || !WeaponToEquip) return;
+
+	EquippedWeapon = WeaponToEquip;
 }
 

@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
+class AWeapon;
+class ACharacterBase;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class AMALGUN_API UCombatComponent : public UActorComponent
@@ -14,12 +16,16 @@ class AMALGUN_API UCombatComponent : public UActorComponent
 
 public:	
 	UCombatComponent();
+	friend class ACharacterBase;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void EquipWeapon(AWeapon* WeaponToEquip);
 
 protected:
 	virtual void BeginPlay() override;
 
-public:	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+private:
+	ACharacterBase* Character;
+	AWeapon* EquippedWeapon;
 
 		
 };

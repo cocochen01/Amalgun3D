@@ -15,6 +15,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UArrowComponent;
 class UCombatComponent;
+class UStaticMeshComponent;
 
 UCLASS()
 class AMALGUN_API ACharacterBase : public ACharacter
@@ -30,6 +31,7 @@ public:
 	ACharacterBase();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void PostInitializeComponents() override;
 	void SetCameraView(AActor* CameraActor);
 	void ResetCameraView();
 	void TogglePauseMenu();
@@ -73,6 +75,8 @@ private:
 	UCameraComponent* ViewCamera;
 	UPROPERTY(VisibleAnywhere)
 	UArrowComponent* HandComponent;
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* HandMeshComponent;
 	UPROPERTY(VisibleAnywhere)
 	UCombatComponent* Combat;
 	/////// Functions ///////
