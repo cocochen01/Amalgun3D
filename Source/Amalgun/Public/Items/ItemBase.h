@@ -15,6 +15,7 @@ class AMALGUN_API UItemBase : public UObject
 	GENERATED_BODY()
 
 public:
+	/////// Variables ///////
 	UPROPERTY(VisibleAnywhere, Category = "Item Data", meta = (UIMin = 1, UIMax = 99))
 	int32 Qualitity;
 	UPROPERTY(EditAnywhere, Category = "Item Data")
@@ -31,6 +32,8 @@ public:
 	FItemNumericData NumericData;
 	UPROPERTY(EditAnywhere, Category = "Item Data")
 	FItemAssetData AssetData;
+
+	/////// Functions ///////
 
 protected:
 

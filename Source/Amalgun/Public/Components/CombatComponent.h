@@ -14,7 +14,8 @@ class AMALGUN_API UCombatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
+	/////// Functions ///////
 	UCombatComponent();
 	friend class ACharacterBase;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -24,6 +25,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	/////// Variables ///////
 	ACharacterBase* Character;
 	AWeapon* EquippedWeapon;
 

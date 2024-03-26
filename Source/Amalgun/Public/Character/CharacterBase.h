@@ -23,6 +23,7 @@ class AMALGUN_API ACharacterBase : public ACharacter
 	GENERATED_BODY()
 
 public:
+	/////// Variables ///////
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Movement")
 	float TurnSpeed = 10.f;
 	UPROPERTY(BlueprintReadOnly, Category = Input)
@@ -38,7 +39,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	//Input
+	/////// Variables ///////
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputMappingContext* CharacterContext;
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -61,12 +62,13 @@ protected:
 	void Esc_Key();
 
 private:
+	/////// Variables ///////
 	APlayerController* PlayerControl;
 	AActor* OtherCamera;
 	bool bInMenu = false;
 	bool bIsMoving = false;
 	FRotator TargetRotation;
-	//Components
+
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* SkeletalMeshComponent;
 	UPROPERTY(VisibleAnywhere)
