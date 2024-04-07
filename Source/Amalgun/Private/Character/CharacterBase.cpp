@@ -1,6 +1,7 @@
 //Header File
 #include "Character/CharacterBase.h"
 #include "AmalgunPlayerController.h"
+#include "Items/Item.h"
 //Enhanced Input
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
@@ -197,6 +198,7 @@ void ACharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	UpdateRotation(DeltaTime);
+	FindClosestInteractable();
 }
 
 void ACharacterBase::SetCameraView(AActor* CameraActor)
@@ -219,4 +221,67 @@ void ACharacterBase::TogglePauseMenu()
 			PC->TogglePauseMenu();
 		}
 	}
+}
+
+void ACharacterBase::AddItem(AItem* item)
+{
+	if (!item)
+		return;
+	ItemsInRange.AddUnique(item);
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Item Added"));
+
+}
+
+void ACharacterBase::RemoveItem(AItem* item)
+{
+	if (!item)
+		return;
+	ItemsInRange.Remove(item);
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Item Removed"));
+}
+
+
+void ACharacterBase::FindClosestInteractable()
+{
+	NearestItem = nullptr;
+	float Closest = MAX_FLT;
+	for (AItem* Item : ItemsInRange)
+	{
+		float DistanceSquared = FVector::DistSquared(GetActorLocation(), Item->GetActorLocation());
+		if (DistanceSquared < Closest)
+		{
+			Closest = DistanceSquared;
+			NearestItem = Item;
+		}
+	}
+	for (AItem* Item : ItemsInRange)
+	{
+		if (Item != NearestItem)
+		{
+			Item->HideWidget();
+		}
+	}
+	if (NearestItem)
+	{
+		NearestItem->ShowWidget();
+	}
+	//if (NearestItem && GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Nearest Item is %s"), *NearestItem->GetName()));
+}
+
+void ACharacterBase::NoInteractableFound()
+{
+}
+
+void ACharacterBase::BeginInteract()
+{
+}
+
+void ACharacterBase::EndInteract()
+{
+}
+
+void ACharacterBase::Interact()
+{
 }

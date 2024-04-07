@@ -1,12 +1,13 @@
-//Base Character Class
+// Base Character Class
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Interfaces/InteractionInterface.h"
 
-//No includes after generated.h
+// No includes after generated.h
 #include "CharacterBase.generated.h"
 
 class UInputMappingContext;
@@ -16,6 +17,17 @@ class UCameraComponent;
 class UArrowComponent;
 class UCombatComponent;
 class UStaticMeshComponent;
+class AItem;
+
+USTRUCT()
+struct FInteractionData
+{
+	GENERATED_USTRUCT_BODY()
+	FInteractionData() : CurrentInteractable(nullptr) {};
+	UPROPERTY()
+	AActor* CurrentInteractable;
+	//float LastInteractionCheckTime;
+};
 
 UCLASS()
 class AMALGUN_API ACharacterBase : public ACharacter
@@ -24,10 +36,11 @@ class AMALGUN_API ACharacterBase : public ACharacter
 
 public:
 	/////// Variables ///////
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Movement")
 	float TurnSpeed = 10.f;
-	UPROPERTY(BlueprintReadOnly, Category = Input)
+	UPROPERTY(BlueprintReadOnly, Category = "Character | Input")
 	bool bIsMovingBackward = false;
+
 	/////// Functions ///////
 	ACharacterBase();
 	virtual void Tick(float DeltaTime) override;
@@ -36,30 +49,41 @@ public:
 	void SetCameraView(AActor* CameraActor);
 	void ResetCameraView();
 	void TogglePauseMenu();
+	void AddItem(AItem*);
+	void RemoveItem(AItem*);
 
 protected:
 	virtual void BeginPlay() override;
 	/////// Variables ///////
-	UPROPERTY(EditAnywhere, Category = Input)
+	UPROPERTY(EditAnywhere, Category = "Character | Input")
 	UInputMappingContext* CharacterContext;
-	UPROPERTY(EditAnywhere, Category = Input)
+	UPROPERTY(EditAnywhere, Category = "Character | Input")
 	UInputAction* MoveAction;
-	UPROPERTY(EditAnywhere, Category = Input)
+	UPROPERTY(EditAnywhere, Category = "Character | Input")
 	UInputAction* LookAction;
-	UPROPERTY(EditAnywhere, Category = Input)
+	UPROPERTY(EditAnywhere, Category = "Character | Input")
 	UInputAction* JumpAction;
-	UPROPERTY(EditAnywhere, Category = Input)
+	UPROPERTY(EditAnywhere, Category = "Character | Input")
 	UInputAction* I_KeyAction;
-	UPROPERTY(EditAnywhere, Category = Input)
+	UPROPERTY(EditAnywhere, Category = "Character | Input")
 	UInputAction* E_KeyAction;
-	UPROPERTY(EditAnywhere, Category = Input)
+	UPROPERTY(EditAnywhere, Category = "Character | Input")
 	UInputAction* Esc_KeyAction;
+	UPROPERTY(VisibleAnywhere, Category = "Character | Interaction")
+	TScriptInterface<IInteractionInterface> TargetInteractable;
+	FInteractionData InteractionData;
+
 	/////// Functions ///////
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void I_Key();
 	void E_Key();
 	void Esc_Key();
+	void FindClosestInteractable();
+	void NoInteractableFound();
+	void BeginInteract();
+	void EndInteract();
+	void Interact();
 
 private:
 	/////// Variables ///////
@@ -68,7 +92,6 @@ private:
 	bool bInMenu = false;
 	bool bIsMoving = false;
 	FRotator TargetRotation;
-
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* SkeletalMeshComponent;
 	UPROPERTY(VisibleAnywhere)
@@ -81,6 +104,12 @@ private:
 	UStaticMeshComponent* HandMeshComponent;
 	UPROPERTY(VisibleAnywhere)
 	UCombatComponent* Combat;
+
+	UPROPERTY(VisibleAnywhere)
+	AItem* NearestItem;
+	UPROPERTY(VisibleAnywhere)
+	TArray<AItem*> ItemsInRange;
+
 	/////// Functions ///////
 	void UpdateRotation(float);
 };

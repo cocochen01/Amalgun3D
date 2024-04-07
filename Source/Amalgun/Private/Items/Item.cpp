@@ -51,6 +51,16 @@ void AItem::Tick(float DeltaTime)
 
 
 }
+void AItem::ShowWidget()
+{
+	if(PickupWidget)
+		PickupWidget->SetVisibility(true);
+}
+void AItem::HideWidget()
+{
+	if(PickupWidget)
+		PickupWidget->SetVisibility(false);
+}
 void AItem::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ACharacterBase* Character = Cast<ACharacterBase>(OtherActor);
@@ -58,8 +68,8 @@ void AItem::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 		return;
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Begin Item Overlap"));
-	if(PickupWidget)
-		PickupWidget->SetVisibility(true);
+	//ShowWidget();
+	Character->AddItem(this);
 }
 
 void AItem::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -69,7 +79,7 @@ void AItem::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Other
 		return;
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("End Item Overlap"));
-	if (PickupWidget)
-		PickupWidget->SetVisibility(false);
+	HideWidget();
+	Character->RemoveItem(this);
 }
 

@@ -28,6 +28,10 @@ class AMALGUN_API AItem : public AActor
 public:	
 	AItem();
 	virtual void Tick(float DeltaTime) override;
+	UFUNCTION()
+	void ShowWidget();
+	UFUNCTION()
+	void HideWidget();
 
 protected:
 	virtual void BeginPlay() override;
