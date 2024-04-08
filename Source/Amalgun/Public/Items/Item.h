@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interfaces/InteractionInterface.h"
 #include "Item.generated.h"
 
 class USphereComponent;
 class UStaticMeshComponent;
 class UWidgetComponent;
+class ACharacterBase;
 
 UENUM(BlueprintType)
 enum class EItemState : uint8
@@ -21,11 +23,14 @@ enum class EItemState : uint8
 };
 
 UCLASS()
-class AMALGUN_API AItem : public AActor
+class AMALGUN_API AItem : public AActor, public IInteractionInterface
 {
 	GENERATED_BODY()
 	
-public:	
+public:
+	/////// Variables ///////
+	
+	/////// Functions ///////
 	AItem();
 	virtual void Tick(float DeltaTime) override;
 	UFUNCTION()
@@ -33,7 +38,27 @@ public:
 	UFUNCTION()
 	void HideWidget();
 
+	virtual void BeginFocus() override;
+	virtual void EndFocus() override;
+	virtual void BeginInteract() override;
+	virtual void EndInteract() override;
+	virtual void Interact(ACharacterBase*) override;
+
 protected:
+	/////// Variables ///////
+	UPROPERTY(EditAnywhere, Category = "Item Properties")
+	UStaticMeshComponent* ItemMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Item Properties")
+	USphereComponent* AreaSphere;
+
+	UPROPERTY(EditAnywhere, Category = "Item Properties")
+	EItemState ItemState;
+
+	UPROPERTY(EditAnywhere, Category = "Item Properties")
+	UWidgetComponent* PickupWidget;
+
+	/////// Functions ///////
 	virtual void BeginPlay() override;
 	UFUNCTION()
 	virtual void OnBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -41,15 +66,6 @@ protected:
 	virtual void OnEndOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-	USkeletalMeshComponent* ItemMesh;
-
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-	USphereComponent* AreaSphere;
-
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-	EItemState ItemState;
-
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-	UWidgetComponent* PickupWidget;
+	/////// Variables ///////
+	/////// Functions ///////
 };

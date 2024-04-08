@@ -1,12 +1,14 @@
-//Header File
+// Header Files
 #include "Character/CharacterBase.h"
+
 #include "AmalgunPlayerController.h"
 #include "Items/Item.h"
-//Enhanced Input
+#include "Interfaces/InteractionInterface.h"
+// Enhanced Input
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-//Components
+// Components
 #include "Components/ArrowComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -38,12 +40,14 @@ ACharacterBase::ACharacterBase()
 	GetCharacterMovement()->MaxAcceleration = 10000.f;
 
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+
+	InteractionCheckFrequency = .1f;
 }
 
 void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	//Controller and Input
+	// Controller and Input
 	PlayerControl = Cast<APlayerController>(GetController());
 	if (PlayerControl)
 	{
@@ -57,7 +61,7 @@ void ACharacterBase::BeginPlay()
 			PlayerControl->PlayerCameraManager->ViewPitchMax = 45.0;
 		}
 	}
-	//Get Bone from Skeleton
+	// Get Bone from Skeleton
 	if (GetMesh())
 	{
 		FName BoneName = FName(TEXT("spine_003"));
@@ -81,6 +85,14 @@ void ACharacterBase::BeginPlay()
 	}
 }
 
+void ACharacterBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	UpdateRotation(DeltaTime);
+	if(GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequency)
+		FindNearestInteractable();
+}
+
 void ACharacterBase::Move(const FInputActionValue& Value)
 {
 	if (bInMenu)
@@ -91,7 +103,7 @@ void ACharacterBase::Move(const FInputActionValue& Value)
 	{
 		const FVector2D MovementVector = Value.Get<FVector2D>();
 		bIsMovingBackward = MovementVector.Y < 0.f;
-		//Movement
+		// Movement
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(ForwardDirection, MovementVector.Y);
@@ -121,7 +133,7 @@ void ACharacterBase::I_Key()
 {
 	if(GEngine)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Pressed I"));
-	//if (!OtherCamera) return;
+	// if (!OtherCamera) return;
 	if (bInMenu)
 	{
 		PlayerControl->SetViewTargetWithBlend(this, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
@@ -138,6 +150,7 @@ void ACharacterBase::E_Key()
 {
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Pressed E"));
+	BeginInteract();
 }
 
 void ACharacterBase::Esc_Key()
@@ -164,7 +177,7 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(I_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::I_Key);
 		EnhancedInputComponent->BindAction(E_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::E_Key);
 		EnhancedInputComponent->BindAction(Esc_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::Esc_Key);
-		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacterBase::Jump);
+		// EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacterBase::Jump);
 	}
 }
 
@@ -185,20 +198,13 @@ void ACharacterBase::UpdateRotation(float DeltaTime)
 	}
 	else
 	{
-		//rotate character body
+		// rotate character body
 		TargetRotation = FRotator(0.f, GetControlRotation().Yaw, 0.f);
 		SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, TurnSpeed));
-		//rotate hands
+		// rotate hands
 		HandComponent->SetRelativeRotation(FMath::RInterpTo(HandComponent->GetRelativeRotation(), FRotator(GetControlRotation().Pitch, 0.f, 0.f), DeltaTime, TurnSpeed));
 
 	}
-}
-
-void ACharacterBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	UpdateRotation(DeltaTime);
-	FindClosestInteractable();
 }
 
 void ACharacterBase::SetCameraView(AActor* CameraActor)
@@ -243,8 +249,16 @@ void ACharacterBase::RemoveItem(AItem* item)
 }
 
 
-void ACharacterBase::FindClosestInteractable()
+void ACharacterBase::FindNearestInteractable()
 {
+	InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
+
+	// InteractionData.CurrentInteractable = nullptr;
+	if (ItemsInRange.IsEmpty())
+	{
+		NoInteractableFound();
+		return;
+	}
 	NearestItem = nullptr;
 	float Closest = MAX_FLT;
 	for (AItem* Item : ItemsInRange)
@@ -256,6 +270,26 @@ void ACharacterBase::FindClosestInteractable()
 			NearestItem = Item;
 		}
 	}
+	if (NearestItem != InteractionData.CurrentInteractable)
+		FoundInteractable();
+	else
+		return;
+}
+
+void ACharacterBase::FoundInteractable()
+{
+	if (IsInteracting())
+		EndInteract();
+	if (InteractionData.CurrentInteractable)
+	{
+		TargetInteractable = InteractionData.CurrentInteractable;
+		TargetInteractable->EndFocus();
+	}
+	InteractionData.CurrentInteractable = NearestItem;
+	TargetInteractable = NearestItem;
+
+	TargetInteractable->BeginFocus();
+	/*
 	for (AItem* Item : ItemsInRange)
 	{
 		if (Item != NearestItem)
@@ -266,22 +300,70 @@ void ACharacterBase::FindClosestInteractable()
 	if (NearestItem)
 	{
 		NearestItem->ShowWidget();
-	}
+		TargetInteractable = NearestItem;
+		TargetInteractable->EndFocus();
+	}*/
+
 	//if (NearestItem && GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Nearest Item is %s"), *NearestItem->GetName()));
 }
 
 void ACharacterBase::NoInteractableFound()
 {
+	if (IsInteracting())
+	{
+		GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
+	}
+	if (InteractionData.CurrentInteractable)
+	{
+		if (IsValid(TargetInteractable.GetObject()))
+		{
+			TargetInteractable->EndFocus();
+		}
+		// Hide Widget
+		InteractionData.CurrentInteractable->HideWidget();
+
+		InteractionData.CurrentInteractable = nullptr;
+		TargetInteractable = nullptr;
+	}
 }
 
 void ACharacterBase::BeginInteract()
 {
+	FindNearestInteractable();
+	if (InteractionData.CurrentInteractable)
+	{
+		if (IsValid(TargetInteractable.GetObject()))
+		{
+			TargetInteractable->BeginInteract();
+			// If there is a valid delay above the error tolerance, start timer, then interact
+			if (FMath::IsNearlyZero(TargetInteractable->InteractableData.InteractionDuration, 0.1f))
+			{
+				Interact();
+			}
+			else
+			{
+				GetWorldTimerManager().SetTimer(TimerHandle_Interaction, this, &ACharacterBase::Interact, TargetInteractable->InteractableData.InteractionDuration, false);
+			}
+		}
+	}
 }
 
 void ACharacterBase::EndInteract()
 {
+	GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
+
+	if (IsValid(TargetInteractable.GetObject()))
+	{
+		TargetInteractable->EndInteract();
+	}
 }
 
 void ACharacterBase::Interact()
 {
+	GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
+
+	if (IsValid(TargetInteractable.GetObject()))
+	{
+		TargetInteractable->Interact(this);
+	}
 }

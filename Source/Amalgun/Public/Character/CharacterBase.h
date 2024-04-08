@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-#include "Interfaces/InteractionInterface.h"
 
 // No includes after generated.h
 #include "CharacterBase.generated.h"
@@ -18,15 +17,17 @@ class UArrowComponent;
 class UCombatComponent;
 class UStaticMeshComponent;
 class AItem;
+class IInteractionInterface;
 
 USTRUCT()
 struct FInteractionData
 {
 	GENERATED_USTRUCT_BODY()
-	FInteractionData() : CurrentInteractable(nullptr) {};
+	FInteractionData() : CurrentInteractable(nullptr), LastInteractionCheckTime(.0f) {};
 	UPROPERTY()
-	AActor* CurrentInteractable;
-	//float LastInteractionCheckTime;
+	AItem* CurrentInteractable;
+	UPROPERTY()
+	float LastInteractionCheckTime;
 };
 
 UCLASS()
@@ -51,6 +52,7 @@ public:
 	void TogglePauseMenu();
 	void AddItem(AItem*);
 	void RemoveItem(AItem*);
+	FORCEINLINE bool IsInteracting() const { return GetWorldTimerManager().IsTimerActive(TimerHandle_Interaction); };
 
 protected:
 	virtual void BeginPlay() override;
@@ -71,7 +73,16 @@ protected:
 	UInputAction* Esc_KeyAction;
 	UPROPERTY(VisibleAnywhere, Category = "Character | Interaction")
 	TScriptInterface<IInteractionInterface> TargetInteractable;
+	UPROPERTY(VisibleAnywhere)
+	float InteractionCheckFrequency;
+	UPROPERTY(VisibleAnywhere)
+	FTimerHandle TimerHandle_Interaction;
+	UPROPERTY(VisibleAnywhere)
 	FInteractionData InteractionData;
+	UPROPERTY(VisibleAnywhere)
+	AItem* NearestItem;
+	UPROPERTY(VisibleAnywhere)
+	TArray<AItem*> ItemsInRange;
 
 	/////// Functions ///////
 	void Move(const FInputActionValue& Value);
@@ -79,7 +90,8 @@ protected:
 	void I_Key();
 	void E_Key();
 	void Esc_Key();
-	void FindClosestInteractable();
+	void FindNearestInteractable();
+	void FoundInteractable();
 	void NoInteractableFound();
 	void BeginInteract();
 	void EndInteract();
@@ -105,10 +117,6 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UCombatComponent* Combat;
 
-	UPROPERTY(VisibleAnywhere)
-	AItem* NearestItem;
-	UPROPERTY(VisibleAnywhere)
-	TArray<AItem*> ItemsInRange;
 
 	/////// Functions ///////
 	void UpdateRotation(float);

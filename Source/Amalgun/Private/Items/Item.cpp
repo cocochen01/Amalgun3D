@@ -1,19 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+//Header Files
 #include "Items/Item.h"
+
+#include "Character/CharacterBase.h"
 //Components
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
-//Other Includes
-#include "Character/CharacterBase.h"
+////////////////////////////////////////
 
 // Sets default values
 AItem::AItem()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	ItemMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ItemMesh"));
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	ItemMesh->SetupAttachment(RootComponent);
 	SetRootComponent(ItemMesh);
 
@@ -51,16 +52,6 @@ void AItem::Tick(float DeltaTime)
 
 
 }
-void AItem::ShowWidget()
-{
-	if(PickupWidget)
-		PickupWidget->SetVisibility(true);
-}
-void AItem::HideWidget()
-{
-	if(PickupWidget)
-		PickupWidget->SetVisibility(false);
-}
 void AItem::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ACharacterBase* Character = Cast<ACharacterBase>(OtherActor);
@@ -79,7 +70,45 @@ void AItem::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Other
 		return;
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("End Item Overlap"));
-	HideWidget();
+	//HideWidget();
 	Character->RemoveItem(this);
 }
+void AItem::ShowWidget()
+{
+	if(PickupWidget)
+		PickupWidget->SetVisibility(true);
+}
+void AItem::HideWidget()
+{
+	if(PickupWidget)
+		PickupWidget->SetVisibility(false);
+}
+
+void AItem::BeginFocus()
+{
+	if (ItemMesh)
+	{
+		ItemMesh->SetRenderCustomDepth(true);
+	}
+}
+void AItem::EndFocus()
+{
+	if (ItemMesh)
+	{
+		ItemMesh->SetRenderCustomDepth(false);
+	}
+}
+void AItem::BeginInteract()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Calling BeginInteract override on Item"));
+}
+void AItem::EndInteract()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Calling EndInteract override on Item"));
+}
+void AItem::Interact(ACharacterBase* PlayerCharacter)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Calling Interact override on Item"));
+}
+
 
