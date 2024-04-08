@@ -87,9 +87,10 @@ protected:
 	/////// Functions ///////
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	void I_Key();
-	void E_Key();
-	void Esc_Key();
+	void IKey();
+	void EKey_Started();
+	void EKey_Completed();
+	void EscKey();
 	void FindNearestInteractable();
 	void FoundInteractable();
 	void NoInteractableFound();

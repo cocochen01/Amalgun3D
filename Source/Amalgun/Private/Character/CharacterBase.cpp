@@ -129,7 +129,7 @@ void ACharacterBase::Look(const FInputActionValue& Value)
 	}
 }
 
-void ACharacterBase::I_Key()
+void ACharacterBase::IKey()
 {
 	if(GEngine)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Pressed I"));
@@ -146,14 +146,20 @@ void ACharacterBase::I_Key()
 	}
 }
 
-void ACharacterBase::E_Key()
+void ACharacterBase::EKey_Started()
 {
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Pressed E"));
 	BeginInteract();
 }
+void ACharacterBase::EKey_Completed()
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Released E"));
+	EndInteract();
+}
 
-void ACharacterBase::Esc_Key()
+void ACharacterBase::EscKey()
 {
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Pressed Esc"));
@@ -174,9 +180,10 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACharacterBase::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACharacterBase::Look);
-		EnhancedInputComponent->BindAction(I_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::I_Key);
-		EnhancedInputComponent->BindAction(E_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::E_Key);
-		EnhancedInputComponent->BindAction(Esc_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::Esc_Key);
+		EnhancedInputComponent->BindAction(I_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::IKey);
+		EnhancedInputComponent->BindAction(E_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::EKey_Started);
+		EnhancedInputComponent->BindAction(E_KeyAction, ETriggerEvent::Completed, this, &ACharacterBase::EKey_Completed);
+		EnhancedInputComponent->BindAction(Esc_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::EscKey);
 		// EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacterBase::Jump);
 	}
 }
@@ -289,22 +296,6 @@ void ACharacterBase::FoundInteractable()
 	TargetInteractable = NearestItem;
 
 	TargetInteractable->BeginFocus();
-	/*
-	for (AItem* Item : ItemsInRange)
-	{
-		if (Item != NearestItem)
-		{
-			Item->HideWidget();
-		}
-	}
-	if (NearestItem)
-	{
-		NearestItem->ShowWidget();
-		TargetInteractable = NearestItem;
-		TargetInteractable->EndFocus();
-	}*/
-
-	//if (NearestItem && GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Nearest Item is %s"), *NearestItem->GetName()));
 }
 
 void ACharacterBase::NoInteractableFound()
