@@ -43,6 +43,8 @@ void AItem::BeginPlay()
 	
 	AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnBeginOverlap);
 	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnEndOverlap);
+
+	InteractableData = InstanceInteractableData;
 }
 
 // Called every frame

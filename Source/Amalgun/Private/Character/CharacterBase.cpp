@@ -1,6 +1,7 @@
 // Header Files
 #include "Character/CharacterBase.h"
 
+#include "WidgetUI/GameHUD.h"
 #include "AmalgunPlayerController.h"
 #include "Items/Item.h"
 #include "Interfaces/InteractionInterface.h"
@@ -47,6 +48,8 @@ ACharacterBase::ACharacterBase()
 void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+	HUD = Cast<AGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	
 	// Controller and Input
 	PlayerControl = Cast<APlayerController>(GetController());
 	if (PlayerControl)
@@ -295,6 +298,9 @@ void ACharacterBase::FoundInteractable()
 	InteractionData.CurrentInteractable = NearestItem;
 	TargetInteractable = NearestItem;
 
+	if(HUD)
+		HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData);
+
 	TargetInteractable->BeginFocus();
 }
 
@@ -311,7 +317,9 @@ void ACharacterBase::NoInteractableFound()
 			TargetInteractable->EndFocus();
 		}
 		// Hide Widget
-		InteractionData.CurrentInteractable->HideWidget();
+		//InteractionData.CurrentInteractable->HideWidget();
+		if (HUD)
+			HUD->HideInteractionWidget();
 
 		InteractionData.CurrentInteractable = nullptr;
 		TargetInteractable = nullptr;

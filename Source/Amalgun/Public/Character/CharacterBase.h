@@ -9,6 +9,7 @@
 // No includes after generated.h
 #include "CharacterBase.generated.h"
 
+class AGameHUD;
 class UInputMappingContext;
 class UInputAction;
 class USpringArmComponent;
@@ -57,6 +58,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	/////// Variables ///////
+	UPROPERTY()
+	AGameHUD* HUD;
 	UPROPERTY(EditAnywhere, Category = "Character | Input")
 	UInputMappingContext* CharacterContext;
 	UPROPERTY(EditAnywhere, Category = "Character | Input")

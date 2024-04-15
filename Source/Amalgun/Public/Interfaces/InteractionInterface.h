@@ -11,9 +11,9 @@ class ACharacterBase;
 UENUM()
 enum class EInteractableType : uint8
 {
-	Pickup UMETA(DisplayName = "Pickup"),
-	NonPlayerCharacter UMETA(DisplayName = "NonPlayerCharacter"),
-	Interactable UMETA(DisplayName = "Interactable")
+	Pickup UMETA(DisplayName = "Pickup"), // Pick up items
+	NonPlayerCharacter UMETA(DisplayName = "NonPlayerCharacter"), // Talk to NPCs
+	Interactable UMETA(DisplayName = "Interactable") // Open doors, chests, etc.
 };
 
 USTRUCT()

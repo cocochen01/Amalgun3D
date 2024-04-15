@@ -58,6 +58,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Item Properties")
 	UWidgetComponent* PickupWidget;
 
+	// Testing only
+	UPROPERTY(EditInstanceOnly, Category = "Test")
+	FInteractableData InstanceInteractableData;
+
 	/////// Functions ///////
 	virtual void BeginPlay() override;
 	UFUNCTION()
