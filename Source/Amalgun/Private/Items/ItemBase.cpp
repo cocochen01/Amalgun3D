@@ -8,13 +8,14 @@ UItemBase::UItemBase()
 	//Initialized in Item Table
 }
 
-UItemBase* UItemBase::CreateItemCopy()
+UItemBase* UItemBase::CreateItemCopy() const
 {
 	UItemBase* ItemCopy = NewObject<UItemBase>(StaticClass());
 	ItemCopy->ID = this->ID;
 	ItemCopy->Quantity = this->Quantity;
 	ItemCopy->ItemQuality = this->ItemQuality;
 	ItemCopy->ItemType = this->ItemType;
+	ItemCopy->TextData = this->TextData;
 	ItemCopy->NumericData = this->NumericData;
 	ItemCopy->ItemStats = this->ItemStats;
 	ItemCopy->AssetData = this->AssetData;

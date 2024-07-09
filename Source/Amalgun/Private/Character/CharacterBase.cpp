@@ -89,7 +89,7 @@ void ACharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	UpdateRotation(DeltaTime);
-	if(GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequency)
+	if(GetWorld()->TimeSince(LastInteractionCheckTime) > InteractionCheckFrequency)
 		FindNearestInteractable();
 }
 
@@ -258,9 +258,8 @@ void ACharacterBase::RemoveItem(AItem* item)
 
 void ACharacterBase::FindNearestInteractable()
 {
-	InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
+	LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
 
-	// InteractionData.CurrentInteractable = nullptr;
 	if (ItemsInRange.IsEmpty())
 	{
 		NoInteractableFound();
@@ -277,7 +276,7 @@ void ACharacterBase::FindNearestInteractable()
 			NearestItem = Item;
 		}
 	}
-	if (NearestItem != InteractionData.CurrentInteractable)
+	if (NearestItem != CurrentInteractable)
 		FoundInteractable();
 	else
 		return;
@@ -287,12 +286,12 @@ void ACharacterBase::FoundInteractable()
 {
 	if (IsInteracting())
 		EndInteract();
-	if (InteractionData.CurrentInteractable)
+	if (CurrentInteractable)
 	{
-		TargetInteractable = InteractionData.CurrentInteractable;
+		TargetInteractable = CurrentInteractable;
 		TargetInteractable->EndFocus();
 	}
-	InteractionData.CurrentInteractable = NearestItem;
+	CurrentInteractable = NearestItem;
 	TargetInteractable = NearestItem;
 
 	TargetInteractable->BeginFocus();
@@ -304,16 +303,17 @@ void ACharacterBase::NoInteractableFound()
 	{
 		GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
 	}
-	if (InteractionData.CurrentInteractable)
+
+	if (CurrentInteractable)
 	{
 		if (IsValid(TargetInteractable.GetObject()))
 		{
 			TargetInteractable->EndFocus();
 		}
 		// Hide Widget
-		InteractionData.CurrentInteractable->HideWidget();
+		CurrentInteractable->HideWidget();
 
-		InteractionData.CurrentInteractable = nullptr;
+		CurrentInteractable = nullptr;
 		TargetInteractable = nullptr;
 	}
 }
@@ -321,7 +321,7 @@ void ACharacterBase::NoInteractableFound()
 void ACharacterBase::BeginInteract()
 {
 	FindNearestInteractable();
-	if (InteractionData.CurrentInteractable)
+	if (CurrentInteractable)
 	{
 		if (IsValid(TargetInteractable.GetObject()))
 		{

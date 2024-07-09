@@ -20,7 +20,9 @@ enum class EItemType : uint8
 {
 	Gun UMETA(DisplayName = "Gun"),
 	Melee UMETA(DisplayName = "Melee"),
-	Artifact UMETA(DisplayName = "Artifact")
+	Defensive UMETA(DisplayName = "Defensive"),
+	Artifact UMETA(DisplayName = "Artifact"),
+	Consumable UMETA(DisplayName = "Consumable")
 };
 
 USTRUCT()
@@ -30,6 +32,10 @@ struct FItemStats
 
 	UPROPERTY(EditAnywhere)
 	float DamageValue;
+	UPROPERTY(EditAnywhere)
+	float RangeValue;
+	UPROPERTY(EditAnywhere)
+	float DefenseValue;
 	UPROPERTY(EditAnywhere)
 	float AttackSpeed;
 };
@@ -45,6 +51,8 @@ struct FItemTextData
 	FText Description;
 	UPROPERTY(EditAnywhere)
 	FText InteractionText;
+	UPROPERTY(EditAnywhere)
+	FText UsageText;
 };
 
 USTRUCT()
@@ -80,7 +88,7 @@ struct FItemData : public FTableRowBase
 	UPROPERTY(EditAnywhere, Category = "Item Data")
 	FName ID;
 	UPROPERTY(EditAnywhere, Category = "Item Data")
-	EItemType ItemTyp;
+	EItemType ItemType;
 	UPROPERTY(EditAnywhere, Category = "Item Data")
 	EItemQuality ItemQuality;
 	UPROPERTY(EditAnywhere, Category = "Item Data")

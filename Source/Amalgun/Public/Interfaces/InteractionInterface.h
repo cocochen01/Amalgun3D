@@ -13,7 +13,9 @@ enum class EInteractableType : uint8
 {
 	Pickup UMETA(DisplayName = "Pickup"),
 	NonPlayerCharacter UMETA(DisplayName = "NonPlayerCharacter"),
-	Interactable UMETA(DisplayName = "Interactable")
+	Device UMETA(DisplayName = "Device"),
+	Button UMETA(DisplayName = "Button"),
+	Container UMETA(DisplayName = "Container")
 };
 
 USTRUCT()
@@ -21,7 +23,12 @@ struct FInteractableData
 {
 	GENERATED_USTRUCT_BODY()
 
-	FInteractableData() : InteractableType(EInteractableType::Pickup), Name(FText::GetEmpty()), Action(FText::GetEmpty()), InteractionDuration(0.f) {};
+	FInteractableData() : 
+		InteractableType(EInteractableType::Pickup),
+		Name(FText::GetEmpty()),
+		Action(FText::GetEmpty()),
+		InteractionDuration(0.f)
+	{};
 
 	UPROPERTY(EditInstanceOnly)
 	EInteractableType InteractableType;
@@ -29,8 +36,8 @@ struct FInteractableData
 	FText Name;
 	UPROPERTY(EditInstanceOnly)
 	FText Action;
-	//UPROPERTY(EditInstanceOnly)
-	//int8 Quantity;
+	UPROPERTY(EditInstanceOnly)
+	int8 Quantity;
 	UPROPERTY(EditInstanceOnly)
 	float InteractionDuration; // For hold-to-interact
 };

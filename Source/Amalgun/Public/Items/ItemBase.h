@@ -18,34 +18,34 @@ public:
 	/////// Variables ///////
 	//UPROPERTY()
 	//UInventoryComponent* OwningInventory;
-	UPROPERTY(VisibleAnywhere, Category = "Item")
+	UPROPERTY(VisibleAnywhere, Category = "Item Data", meta = (UIMin = 1, UIMax=100))
 	int32 Quantity;
-	UPROPERTY(VisibleAnywhere, Category = "Item")
+	UPROPERTY(VisibleAnywhere, Category = "Item Data")
 	FName ID;
-	UPROPERTY(VisibleAnywhere, Category = "Item ")
+	UPROPERTY(VisibleAnywhere, Category = "Item Data")
 	EItemType ItemType;
-	UPROPERTY(VisibleAnywhere, Category = "Item")
+	UPROPERTY(VisibleAnywhere, Category = "Item Data")
 	EItemQuality ItemQuality;
-	UPROPERTY(VisibleAnywhere, Category = "Item")
+	UPROPERTY(VisibleAnywhere, Category = "Item Data")
 	FItemStats ItemStats;
-	UPROPERTY(VisibleAnywhere, Category = "Item")
+	UPROPERTY(VisibleAnywhere, Category = "Item Data")
 	FItemTextData TextData;
-	UPROPERTY(VisibleAnywhere, Category = "Item")
+	UPROPERTY(VisibleAnywhere, Category = "Item Data")
 	FItemNumericData NumericData;
-	UPROPERTY(VisibleAnywhere, Category = "Item")
+	UPROPERTY(VisibleAnywhere, Category = "Item Data")
 	FItemAssetData AssetData;
 
 	/////// Functions ///////
 	UItemBase();
 
-	UItemBase* CreateItemCopy();
+	UItemBase* CreateItemCopy() const;
 
 	UFUNCTION(Category = "Item")
 	FORCEINLINE float GetItemStackWeight() const { return Quantity * NumericData.Weight; };
 	UFUNCTION(Category = "Item")
 	FORCEINLINE float GetItemSingleWeight() const { return NumericData.Weight; };
 	UFUNCTION(Category = "Item")
-	FORCEINLINE bool IsFullItemStack() const { return Quantity == NumericData.MaxStackSize; };
+	FORCEINLINE bool IsFullItemStack() const { return Quantity >= NumericData.MaxStackSize; };
 
 	UFUNCTION(Category = "Item")
 	void SetQuantity(const int32 NewQuantity);

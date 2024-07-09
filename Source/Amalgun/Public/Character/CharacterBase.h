@@ -18,17 +18,23 @@ class UCombatComponent;
 class UStaticMeshComponent;
 class AItem;
 class IInteractionInterface;
-
+/*
 USTRUCT()
 struct FInteractionData
 {
 	GENERATED_USTRUCT_BODY()
-	FInteractionData() : CurrentInteractable(nullptr), LastInteractionCheckTime(.0f) {};
+	
+	FInteractionData() :
+		CurrentInteractable(nullptr),
+		LastInteractionCheckTime(.0f)
+	{};
+
 	UPROPERTY()
+	//AActor* CurrentInteractable;
 	AItem* CurrentInteractable;
 	UPROPERTY()
 	float LastInteractionCheckTime;
-};
+};*/
 
 UCLASS()
 class AMALGUN_API ACharacterBase : public ACharacter
@@ -72,17 +78,24 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Character | Input")
 	UInputAction* Esc_KeyAction;
 	UPROPERTY(VisibleAnywhere, Category = "Character | Interaction")
+
 	TScriptInterface<IInteractionInterface> TargetInteractable;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<AItem*> ItemsInRange;
+	UPROPERTY()
+	AItem* CurrentInteractable;
+	UPROPERTY(VisibleAnywhere)
+	AItem* NearestItem;
+
 	UPROPERTY(VisibleAnywhere)
 	float InteractionCheckFrequency;
 	UPROPERTY(VisibleAnywhere)
 	FTimerHandle TimerHandle_Interaction;
-	UPROPERTY(VisibleAnywhere)
-	FInteractionData InteractionData;
-	UPROPERTY(VisibleAnywhere)
-	AItem* NearestItem;
-	UPROPERTY(VisibleAnywhere)
-	TArray<AItem*> ItemsInRange;
+	UPROPERTY()
+	float LastInteractionCheckTime;
+	//UPROPERTY(VisibleAnywhere)
+	//FInteractionData InteractionData;
 
 	/////// Functions ///////
 	void Move(const FInputActionValue& Value);
