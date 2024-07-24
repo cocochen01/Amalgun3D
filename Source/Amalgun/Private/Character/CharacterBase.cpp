@@ -143,11 +143,16 @@ void ACharacterBase::IKey()
 	if (bSwappedCamera)
 	{
 		PlayerControl->SetViewTargetWithBlend(this, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
+		PlayerControl->bShowMouseCursor = false;
 		bSwappedCamera = false;
 	}
 	else if(OtherCamera)
 	{
 		PlayerControl->SetViewTargetWithBlend(OtherCamera, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
+		int32 ViewportX, ViewportY;
+		PlayerControl->GetViewportSize(ViewportX, ViewportY);
+		PlayerControl->SetMouseLocation(ViewportX / 2, ViewportY / 2);
+		PlayerControl->bShowMouseCursor = true;
 		bSwappedCamera = true;
 	}
 }
@@ -172,6 +177,7 @@ void ACharacterBase::EscKey()
 	if (bSwappedCamera)
 	{
 		PlayerControl->SetViewTargetWithBlend(this, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
+		PlayerControl->bShowMouseCursor = false;
 		bSwappedCamera = false;
 	}
 	else
@@ -180,8 +186,38 @@ void ACharacterBase::EscKey()
 
 void ACharacterBase::LMB()
 {
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Pressed LMB"));
+	if (bSwappedCamera)
+	{
+		if (!PlayerControl)
+			return;
+		float CursorX, CursorY;
+		PlayerControl->GetMousePosition(CursorX, CursorY);
+	
+		FVector WorldLocation, WorldDirection;
+		PlayerControl->DeprojectScreenPositionToWorld(CursorX, CursorY, WorldLocation, WorldDirection);
+
+		FVector TraceStart = WorldLocation;
+		FVector TraceEnd = TraceStart + (WorldDirection * 500.0f);
+
+		FHitResult HitResult;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+
+		if (GetWorld() && GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, Params))
+		{
+			AActor* HitActor = HitResult.GetActor();
+			if (HitActor)
+			{
+				AItem* HitItem = Cast<AItem>(HitActor);
+				if (HitItem)
+				{
+					
+				}
+			}
+		}
+
+		//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Green, false, 0.2f, 0, 0.5f);
+	}
 }
 
 void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -197,7 +233,7 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(EKeyAction, ETriggerEvent::Started, this, &ACharacterBase::EKey_Started);
 		EnhancedInputComponent->BindAction(EKeyAction, ETriggerEvent::Completed, this, &ACharacterBase::EKey_Completed);
 		EnhancedInputComponent->BindAction(EscKeyAction, ETriggerEvent::Started, this, &ACharacterBase::EscKey);
-		EnhancedInputComponent->BindAction(LMBAction, ETriggerEvent::Started, this, &ACharacterBase::LMB);
+		EnhancedInputComponent->BindAction(LMBAction, ETriggerEvent::Triggered, this, &ACharacterBase::LMB);
 	}
 }
 

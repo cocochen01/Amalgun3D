@@ -119,11 +119,10 @@ protected:
 
 private:
 	/////// Variables ///////
+	UPROPERTY(VisibleAnywhere)
 	APlayerController* PlayerControl;
+	UPROPERTY(VisibleAnywhere)
 	AActor* OtherCamera;
-	bool bSwappedCamera = false;
-	bool bIsMoving = false;
-	FRotator TargetRotation;
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* SkeletalMeshComponent;
 	UPROPERTY(VisibleAnywhere)
@@ -136,6 +135,12 @@ private:
 	UStaticMeshComponent* HandMeshComponent;
 	UPROPERTY(VisibleAnywhere)
 	UCombatComponent* Combat;
+
+	bool bSwappedCamera = false;
+	bool bIsMoving = false;
+	FRotator TargetRotation;
+	AItem* HeldItem;
+	bool bIsHoldingItem;
 
 
 	/////// Functions ///////
