@@ -20,20 +20,20 @@ AItem::AItem()
 	SetRootComponent(RootSceneComponent);
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
+	ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	//ItemMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	ItemMesh->SetupAttachment(RootSceneComponent);
-	ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	ItemMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
-	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
-	AreaSphere->SetupAttachment(RootSceneComponent);
 	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	//AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	AreaSphere->SetupAttachment(RootSceneComponent);
 
-	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
-	PickupWidget->SetupAttachment(RootSceneComponent);
+	//PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
+	//PickupWidget->SetupAttachment(RootSceneComponent);
 
 	ItemState = EItemState::EIS_Dropped;
 }

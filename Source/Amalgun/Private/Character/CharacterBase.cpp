@@ -184,7 +184,7 @@ void ACharacterBase::EscKey()
 		TogglePauseMenu();
 }
 
-void ACharacterBase::LMB()
+void ACharacterBase::LMB_Triggered()
 {
 	if (bSwappedCamera)
 	{
@@ -205,18 +205,37 @@ void ACharacterBase::LMB()
 
 		if (GetWorld() && GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, Params))
 		{
-			AActor* HitActor = HitResult.GetActor();
-			if (HitActor)
+			if (HeldItem && bIsHoldingItem)
 			{
-				AItem* HitItem = Cast<AItem>(HitActor);
-				if (HitItem)
+				FVector ItemCurrentLocation = HeldItem->GetActorLocation();
+				float Distance = FVector::Dist(TraceStart, ItemCurrentLocation);
+				HeldItem->SetActorLocation(TraceStart + (WorldDirection * Distance));
+			}
+			else
+			{
+				AActor* HitActor = HitResult.GetActor();
+				if (HitActor)
 				{
-					
+					AItem* HitItem = Cast<AItem>(HitActor);
+					if (HitItem)
+					{
+						HeldItem = HitItem;
+						bIsHoldingItem = true;
+					}
 				}
 			}
 		}
 
-		//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Green, false, 0.2f, 0, 0.5f);
+		DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Green, false, 2.0f, 0, 0.5f);
+	}
+}
+
+void ACharacterBase::LMB_Completed()
+{
+	if (bSwappedCamera)
+	{
+		HeldItem = nullptr;
+		bIsHoldingItem = false;
 	}
 }
 
@@ -233,7 +252,8 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(EKeyAction, ETriggerEvent::Started, this, &ACharacterBase::EKey_Started);
 		EnhancedInputComponent->BindAction(EKeyAction, ETriggerEvent::Completed, this, &ACharacterBase::EKey_Completed);
 		EnhancedInputComponent->BindAction(EscKeyAction, ETriggerEvent::Started, this, &ACharacterBase::EscKey);
-		EnhancedInputComponent->BindAction(LMBAction, ETriggerEvent::Triggered, this, &ACharacterBase::LMB);
+		EnhancedInputComponent->BindAction(LMBAction, ETriggerEvent::Triggered, this, &ACharacterBase::LMB_Triggered);
+		EnhancedInputComponent->BindAction(LMBAction, ETriggerEvent::Completed, this, &ACharacterBase::LMB_Completed);
 	}
 }
 

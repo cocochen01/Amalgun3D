@@ -108,7 +108,8 @@ protected:
 	void EKey_Started();
 	void EKey_Completed();
 	void EscKey();
-	void LMB();
+	void LMB_Triggered();
+	void LMB_Completed();
 
 	void FindNearestInteractable();
 	void FoundInteractable();
@@ -135,11 +136,12 @@ private:
 	UStaticMeshComponent* HandMeshComponent;
 	UPROPERTY(VisibleAnywhere)
 	UCombatComponent* Combat;
+	UPROPERTY(VisibleAnywhere)
+	AItem* HeldItem;
 
 	bool bSwappedCamera = false;
 	bool bIsMoving = false;
 	FRotator TargetRotation;
-	AItem* HeldItem;
 	bool bIsHoldingItem;
 
 
