@@ -77,6 +77,9 @@ protected:
 	UInputAction* E_KeyAction;
 	UPROPERTY(EditAnywhere, Category = "Character | Input")
 	UInputAction* Esc_KeyAction;
+	UPROPERTY(EditAnywhere, Category = "Character | Input")
+	UInputAction* LMBAction;
+
 	UPROPERTY(VisibleAnywhere, Category = "Character | Interaction")
 
 	TScriptInterface<IInteractionInterface> TargetInteractable;
@@ -104,6 +107,8 @@ protected:
 	void EKey_Started();
 	void EKey_Completed();
 	void EscKey();
+	void LMB();
+
 	void FindNearestInteractable();
 	void FoundInteractable();
 	void NoInteractableFound();

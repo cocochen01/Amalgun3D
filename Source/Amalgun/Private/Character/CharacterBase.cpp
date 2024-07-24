@@ -172,6 +172,12 @@ void ACharacterBase::EscKey()
 		TogglePauseMenu();
 }
 
+void ACharacterBase::LMB()
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Pressed LMB"));
+}
+
 void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);

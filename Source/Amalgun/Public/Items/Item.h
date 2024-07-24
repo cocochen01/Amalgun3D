@@ -7,6 +7,7 @@
 #include "Interfaces/InteractionInterface.h"
 #include "Item.generated.h"
 
+class USceneComponent;
 class USphereComponent;
 class UStaticMeshComponent;
 class UWidgetComponent;
@@ -46,6 +47,9 @@ public:
 
 protected:
 	/////// Variables ///////
+	UPROPERTY(EditAnywhere, Category = "Item Properties")
+	USceneComponent* RootSceneComponent;
+
 	UPROPERTY(EditAnywhere, Category = "Item Properties")
 	UStaticMeshComponent* ItemMesh;
 

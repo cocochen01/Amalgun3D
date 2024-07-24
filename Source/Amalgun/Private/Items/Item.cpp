@@ -5,6 +5,7 @@
 
 #include "Character/CharacterBase.h"
 //Components
+#include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 ////////////////////////////////////////
@@ -14,23 +15,27 @@ AItem::AItem()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
-	ItemMesh->SetupAttachment(RootComponent);
-	SetRootComponent(ItemMesh);
+	RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	RootSceneComponent->SetupAttachment(RootComponent);
+	SetRootComponent(RootSceneComponent);
 
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
+	ItemMesh->SetupAttachment(RootSceneComponent);
 	ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	ItemMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
-	AreaSphere->SetupAttachment(RootComponent);
+	AreaSphere->SetupAttachment(RootSceneComponent);
 	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	//AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
-	PickupWidget->SetupAttachment(RootComponent);
+	PickupWidget->SetupAttachment(RootSceneComponent);
+
+	ItemState = EItemState::EIS_Dropped;
 }
 
 // Called when the game starts or when spawned
@@ -43,24 +48,28 @@ void AItem::BeginPlay()
 	
 	AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnBeginOverlap);
 	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnEndOverlap);
+
 }
 
 // Called every frame
+// Tick currently set to false
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-
 }
+
 void AItem::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ACharacterBase* Character = Cast<ACharacterBase>(OtherActor);
 	if (!Character)
 		return;
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Begin Item Overlap"));
-	//ShowWidget();
-	Character->AddItem(this);
+	if (ItemState == EItemState::EIS_Dropped)
+	{
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Begin Item Overlap"));
+		//ShowWidget();
+		Character->AddItem(this);
+	}
 }
 
 void AItem::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -68,10 +77,13 @@ void AItem::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Other
 	ACharacterBase* Character = Cast<ACharacterBase>(OtherActor);
 	if (!Character)
 		return;
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("End Item Overlap"));
-	//HideWidget();
-	Character->RemoveItem(this);
+	if (ItemState == EItemState::EIS_Dropped)
+	{
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("End Item Overlap"));
+		//HideWidget();
+		Character->RemoveItem(this);
+	}
 }
 void AItem::ShowWidget()
 {
