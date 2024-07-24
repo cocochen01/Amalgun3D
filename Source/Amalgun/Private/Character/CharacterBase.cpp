@@ -95,7 +95,7 @@ void ACharacterBase::Tick(float DeltaTime)
 
 void ACharacterBase::Move(const FInputActionValue& Value)
 {
-	if (bInMenu)
+	if (bSwappedCamera)
 	{
 		
 	}
@@ -114,7 +114,7 @@ void ACharacterBase::Move(const FInputActionValue& Value)
 
 void ACharacterBase::Look(const FInputActionValue& Value)
 {
-	if (bInMenu)
+	if (bSwappedCamera)
 	{
 
 	}
@@ -134,15 +134,15 @@ void ACharacterBase::IKey()
 	if(GEngine)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Pressed I"));
 	// if (!OtherCamera) return;
-	if (bInMenu)
+	if (bSwappedCamera)
 	{
 		PlayerControl->SetViewTargetWithBlend(this, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
-		bInMenu = false;
+		bSwappedCamera = false;
 	}
 	else if(OtherCamera)
 	{
 		PlayerControl->SetViewTargetWithBlend(OtherCamera, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
-		bInMenu = true;
+		bSwappedCamera = true;
 	}
 }
 
@@ -163,10 +163,10 @@ void ACharacterBase::EscKey()
 {
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Pressed Esc"));
-	if (bInMenu)
+	if (bSwappedCamera)
 	{
 		PlayerControl->SetViewTargetWithBlend(this, 0.5f, EViewTargetBlendFunction::VTBlend_Linear, 0.2f, false);
-		bInMenu = false;
+		bSwappedCamera = false;
 	}
 	else
 		TogglePauseMenu();

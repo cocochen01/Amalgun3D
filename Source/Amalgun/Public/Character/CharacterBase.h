@@ -120,7 +120,7 @@ private:
 	/////// Variables ///////
 	APlayerController* PlayerControl;
 	AActor* OtherCamera;
-	bool bInMenu = false;
+	bool bSwappedCamera = false;
 	bool bIsMoving = false;
 	FRotator TargetRotation;
 	UPROPERTY(VisibleAnywhere)
