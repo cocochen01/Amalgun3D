@@ -129,6 +129,12 @@ void ACharacterBase::Look(const FInputActionValue& Value)
 	}
 }
 
+void ACharacterBase::SpaceBar()
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Pressed Space Bar"));
+}
+
 void ACharacterBase::IKey()
 {
 	if(GEngine)
@@ -186,11 +192,12 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACharacterBase::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACharacterBase::Look);
-		EnhancedInputComponent->BindAction(I_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::IKey);
-		EnhancedInputComponent->BindAction(E_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::EKey_Started);
-		EnhancedInputComponent->BindAction(E_KeyAction, ETriggerEvent::Completed, this, &ACharacterBase::EKey_Completed);
-		EnhancedInputComponent->BindAction(Esc_KeyAction, ETriggerEvent::Started, this, &ACharacterBase::EscKey);
-		// EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacterBase::Jump);
+		EnhancedInputComponent->BindAction(SpaceBarAction, ETriggerEvent::Started, this, &ACharacterBase::SpaceBar);
+		EnhancedInputComponent->BindAction(IKeyAction, ETriggerEvent::Started, this, &ACharacterBase::IKey);
+		EnhancedInputComponent->BindAction(EKeyAction, ETriggerEvent::Started, this, &ACharacterBase::EKey_Started);
+		EnhancedInputComponent->BindAction(EKeyAction, ETriggerEvent::Completed, this, &ACharacterBase::EKey_Completed);
+		EnhancedInputComponent->BindAction(EscKeyAction, ETriggerEvent::Started, this, &ACharacterBase::EscKey);
+		EnhancedInputComponent->BindAction(LMBAction, ETriggerEvent::Started, this, &ACharacterBase::LMB);
 	}
 }
 

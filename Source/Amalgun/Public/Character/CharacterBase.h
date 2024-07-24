@@ -70,13 +70,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Character | Input")
 	UInputAction* LookAction;
 	UPROPERTY(EditAnywhere, Category = "Character | Input")
-	UInputAction* JumpAction;
+	UInputAction* SpaceBarAction;
 	UPROPERTY(EditAnywhere, Category = "Character | Input")
-	UInputAction* I_KeyAction;
+	UInputAction* IKeyAction;
 	UPROPERTY(EditAnywhere, Category = "Character | Input")
-	UInputAction* E_KeyAction;
+	UInputAction* EKeyAction;
 	UPROPERTY(EditAnywhere, Category = "Character | Input")
-	UInputAction* Esc_KeyAction;
+	UInputAction* EscKeyAction;
 	UPROPERTY(EditAnywhere, Category = "Character | Input")
 	UInputAction* LMBAction;
 
@@ -103,6 +103,7 @@ protected:
 	/////// Functions ///////
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void SpaceBar();
 	void IKey();
 	void EKey_Started();
 	void EKey_Completed();
