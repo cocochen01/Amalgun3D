@@ -184,7 +184,7 @@ void ACharacterBase::EscKey()
 		TogglePauseMenu();
 }
 
-void ACharacterBase::LMB_Triggered()
+void ACharacterBase::LMB_Started()
 {
 	if (bSwappedCamera)
 	{
@@ -192,7 +192,7 @@ void ACharacterBase::LMB_Triggered()
 			return;
 		float CursorX, CursorY;
 		PlayerControl->GetMousePosition(CursorX, CursorY);
-	
+
 		FVector WorldLocation, WorldDirection;
 		PlayerControl->DeprojectScreenPositionToWorld(CursorX, CursorY, WorldLocation, WorldDirection);
 
@@ -205,28 +205,40 @@ void ACharacterBase::LMB_Triggered()
 
 		if (GetWorld() && GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, Params))
 		{
-			if (HeldItem && bIsHoldingItem)
+			AActor* HitActor = HitResult.GetActor();
+			if (HitActor)
 			{
-				FVector ItemCurrentLocation = HeldItem->GetActorLocation();
-				float Distance = FVector::Dist(TraceStart, ItemCurrentLocation);
-				HeldItem->SetActorLocation(TraceStart + (WorldDirection * Distance));
-			}
-			else
-			{
-				AActor* HitActor = HitResult.GetActor();
-				if (HitActor)
+				AItem* Item = Cast<AItem>(HitActor);
+				if (Item)
 				{
-					AItem* HitItem = Cast<AItem>(HitActor);
-					if (HitItem)
-					{
-						HeldItem = HitItem;
-						bIsHoldingItem = true;
-					}
+					HeldItem = Item;
+					bIsHoldingItem = true;
 				}
 			}
 		}
 
-		DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Green, false, 2.0f, 0, 0.5f);
+		DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Green, false, 1.0f, 0, 0.5f);
+	}
+}
+
+void ACharacterBase::LMB_Triggered()
+{
+	if (bSwappedCamera)
+	{
+		if (!PlayerControl)
+			return;
+		float CursorX, CursorY;
+		PlayerControl->GetMousePosition(CursorX, CursorY);
+
+		FVector WorldLocation, WorldDirection;
+		PlayerControl->DeprojectScreenPositionToWorld(CursorX, CursorY, WorldLocation, WorldDirection);
+
+		if (HeldItem && bIsHoldingItem)
+		{
+			FVector ItemCurrentLocation = HeldItem->GetActorLocation();
+			float Distance = FVector::Dist(WorldLocation, ItemCurrentLocation);
+			HeldItem->SetActorLocation(WorldLocation + (WorldDirection * Distance));
+		}
 	}
 }
 
@@ -252,6 +264,7 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(EKeyAction, ETriggerEvent::Started, this, &ACharacterBase::EKey_Started);
 		EnhancedInputComponent->BindAction(EKeyAction, ETriggerEvent::Completed, this, &ACharacterBase::EKey_Completed);
 		EnhancedInputComponent->BindAction(EscKeyAction, ETriggerEvent::Started, this, &ACharacterBase::EscKey);
+		EnhancedInputComponent->BindAction(LMBAction, ETriggerEvent::Started, this, &ACharacterBase::LMB_Started);
 		EnhancedInputComponent->BindAction(LMBAction, ETriggerEvent::Triggered, this, &ACharacterBase::LMB_Triggered);
 		EnhancedInputComponent->BindAction(LMBAction, ETriggerEvent::Completed, this, &ACharacterBase::LMB_Completed);
 	}

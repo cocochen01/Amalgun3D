@@ -108,6 +108,7 @@ protected:
 	void EKey_Started();
 	void EKey_Completed();
 	void EscKey();
+	void LMB_Started();
 	void LMB_Triggered();
 	void LMB_Completed();
 
